@@ -3,206 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gap Finder — Найди свободную нишу</title>
+    <title>Gap Finder — Анализ каналов</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #121212;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 50px 20px;
-            margin: 0;
-        }
-        h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff8a00, #e52e71);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        p.subtitle {
-            color: #aaaaaa;
-            margin-bottom: 30px;
-        }
-        .search-box {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            max-width: 500px;
-            margin-bottom: 40px;
-        }
-        input {
-            flex: 1;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #222;
-            color: white;
-            font-size: 16px;
-            outline: none;
-        }
-        input:focus { border-color: #e52e71; }
-        button {
-            padding: 15px 30px;
-            border-radius: 8px;
-            border: none;
-            background: linear-gradient(90deg, #ff8a00, #e52e71);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; margin: 0; }
+        h1 { font-size: 32px; margin-bottom: 10px; background: linear-gradient(90deg, #ff8a00, #e52e71); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { color: #aaa; margin-bottom: 30px; text-align: center; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; background: #1e1e1e; padding: 5px; border-radius: 10px; border: 1px solid #333; }
+        .tab-btn { padding: 10px 20px; border: none; background: transparent; color: #888; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn.active { background: #333; color: white; }
         
-        #result {
-            width: 100%;
-            max-width: 800px;
-        }
-        .card {
-            background: #1e1e1e;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-        .metrics {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .metric {
-            background: #2a2a2a;
-            padding: 15px 25px;
-            border-radius: 8px;
-            flex: 1;
-            text-align: center;
-        }
-        .metric-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ff8a00;
-        }
-        .metric-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-        th { color: #888; font-size: 12px; text-transform: uppercase; }
-        .tag {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: #e52e71;
-            font-size: 12px;
-            font-weight: bold;
-        }
+        .search-box { display: flex; gap: 10px; width: 100%; max-width: 600px; margin-bottom: 30px; }
+        input { flex: 1; padding: 15px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; font-size: 16px; outline: none; }
+        input:focus { border-color: #e52e71; }
+        button.action-btn { padding: 15px 30px; border-radius: 8px; border: none; background: linear-gradient(90deg, #ff8a00, #e52e71); color: white; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        #result, #top-result { width: 100%; max-width: 1000px; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #333; }
+        
+        .lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .lang-col { background: #2a2a2a; border-radius: 8px; padding: 15px; }
+        .lang-title { font-size: 16px; font-weight: bold; color: #ff8a00; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .channel-item { font-size: 13px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #444; }
+        .channel-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .channel-name { font-weight: bold; color: #fff; text-decoration: none; display: block; margin-bottom: 2px;}
+        .channel-name:hover { color: #e52e71; }
+        .channel-subs { color: #888; }
+        
+        .top-list { list-style: none; padding: 0; margin: 0; }
+        .top-list li { padding: 16px 0; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .top-list li:last-child { border-bottom: none; }
+        .top-info { display: flex; align-items: center; gap: 15px; }
+        .top-rank { color: #e52e71; font-weight: bold; font-size: 18px; }
+        .top-title { color: white; text-decoration: none; font-weight: bold; font-size: 16px; display: block; margin-bottom: 4px; }
+        .top-title:hover { color: #ff8a00; }
+        .top-meta { color: #888; font-size: 12px; }
+        
+        .top-stats { text-align: right; }
+        .top-subs { color: #ff8a00; font-weight: bold; font-size: 16px; }
+        .top-views { color: #888; font-size: 12px; }
+        
+        .btn-details { margin-top: 8px; padding: 6px 12px; background: #333; color: #fff; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s; }
+        .btn-details:hover { background: #e52e71; border-color: #e52e71; }
     </style>
 </head>
 <body>
 
     <h1>Gap Finder</h1>
-    <p class="subtitle">Узнай, какие новые каналы взлетают в твоей нише</p>
-
-    <div class="search-box">
-        <input type="text" id="query" placeholder="Например: AI automation tutorials" value="Cursor AI coding">
-        <button id="searchBtn">Анализ</button>
+    
+    <div class="tabs">
+        <button id="tab1" class="tab-btn active">Анализ канала</button>
+        <button id="tab2" class="tab-btn">Тренды</button>
     </div>
 
-    <div id="result"></div>
+    <!-- Секция 1 -->
+    <div id="analyze-section" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <p class="subtitle">Найдите конкурентов в разных языках на основе вашего канала</p>
+        <div class="search-box">
+            <input type="text" id="channelUrl" placeholder="Ссылка на канал (например, https://youtube.com/@MrBeast)" value="https://youtube.com/@ManhwaRecount">
+            <button id="analyzeBtn" class="action-btn">Анализ</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <!-- Секция 2 -->
+    <div id="top-section" style="display: none; width: 100%; max-width: 1000px;">
+        <p class="subtitle">Самые просматриваемые видео за последнюю неделю в разных языковых сегментах</p>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button id="topBtn" class="action-btn">Показать Тренды</button>
+        </div>
+        <div id="top-result"></div>
+    </div>
 
     <script>
-        const searchBtn = document.getElementById("searchBtn");
-        const queryInput = document.getElementById("query");
+        const tab1 = document.getElementById("tab1");
+        const tab2 = document.getElementById("tab2");
+        const analyzeSection = document.getElementById("analyze-section");
+        const topSection = document.getElementById("top-section");
+
+        function switchTab(tab) {
+            if (tab === 'analyze') {
+                analyzeSection.style.display = "flex";
+                topSection.style.display = "none";
+                tab1.classList.add("active");
+                tab2.classList.remove("active");
+            } else {
+                analyzeSection.style.display = "none";
+                topSection.style.display = "block";
+                tab1.classList.remove("active");
+                tab2.classList.add("active");
+            }
+        }
+
+        tab1.addEventListener("click", () => switchTab('analyze'));
+        tab2.addEventListener("click", () => switchTab('top'));
+
+        // --- РАЗДЕЛ 1 ---
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        const channelUrlInput = document.getElementById("channelUrl");
         const resultDiv = document.getElementById("result");
 
-        async function search() {
-            const q = queryInput.value.trim();
-            if (!q) return;
-
-            searchBtn.disabled = true;
-            searchBtn.textContent = "Анализ...";
-            resultDiv.innerHTML = "<p style='color: #888;'>Собираем данные с YouTube...</p>";
-
+        async function analyzeChannel() {
+            const url = channelUrlInput.value.trim();
+            if (!url) return;
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = "Ищем...";
+            resultDiv.innerHTML = "<p style='color: #888;'>Анализируем канал и ищем конкурентов в 8 языках...</p>";
             try {
-                const response = await fetch(`/api/analyze?q=${encodeURIComponent(q)}`);
+                const response = await fetch(`/api/analyze-channel?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
-
                 if (data.error) throw new Error(data.error);
-
-                renderResult(data);
+                renderAnalyzeResult(data);
             } catch (err) {
                 resultDiv.innerHTML = `<p style="color: red;">Ошибка: ${err.message}</p>`;
             } finally {
-                searchBtn.disabled = false;
-                searchBtn.textContent = "Анализ";
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = "Анализ";
             }
         }
 
-        function renderResult(data) {
-            let html = `
-                <div class="card">
-                    <h2 style="margin-top:0;">Ниша: ${data.query}</h2>
-                    <div class="metrics">
-                        <div class="metric">
-                            <div class="metric-value">${data.newChannelsCount}</div>
-                            <div class="metric-label">Новых каналов (до 2 мес.)</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">${data.index}</div>
-                            <div class="metric-label">Индекс роста (ср. просмотры)</div>
-                        </div>
-                    </div>
-            `;
-
-            if (data.newChannels.length > 0) {
-                html += `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Канал</th>
-                                <th>Дата создания</th>
-                                <th>Просмотры</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                data.newChannels.forEach(ch => {
-                    const date = new Date(ch.createdAt).toLocaleDateString();
-                    html += `
-                        <tr>
-                            <td>${ch.title}</td>
-                            <td>${date}</td>
-                            <td><span class="tag">${ch.views}</span></td>
-                        </tr>
-                    `;
-                });
-                html += `</tbody></table>`;
-            } else {
-                html += `<p style="color: #888;">В этой нише нет новых каналов. Либо ниша занята, либо люди не создают под неё каналы.</p>`;
+        function renderAnalyzeResult(data) {
+            let html = `<div class="card"><h2>Канал: ${data.channelName}</h2><p style="color: #888;">Ниша: "${data.niche}"</p><div class="lang-grid">`;
+            for (const [lang, channels] of Object.entries(data.topChannelsByLang)) {
+                html += `<div class="lang-col"><div class="lang-title">${lang}</div>`;
+                if (channels.length === 0) {
+                    html += `<div style="color: #666; font-size: 13px;">Нет активных каналов</div>`;
+                } else {
+                    channels.forEach(ch => {
+                        html += `<div class="channel-item"><a href="${ch.url}" target="_blank" class="channel-name">${ch.title}</a><span class="channel-subs">${ch.subscribers.toLocaleString()} подписчиков</span></div>`;
+                    });
+                }
+                html += `</div>`;
             }
-
-            html += `</div>`;
+            html += `</div></div>`;
             resultDiv.innerHTML = html;
         }
 
-        searchBtn.addEventListener("click", search);
-        queryInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") search();
+        analyzeBtn.addEventListener("click", analyzeChannel);
+        channelUrlInput.addEventListener("keypress", (e) => { if (e.key === "Enter") analyzeChannel(); });
+
+        // --- РАЗДЕЛ 2 ---
+        const topBtn = document.getElementById("topBtn");
+        const topResultDiv = document.getElementById("top-result");
+
+        topBtn.addEventListener("click", async () => {
+            topBtn.disabled = true;
+            topBtn.textContent = "Ищем...";
+            topResultDiv.innerHTML = "<p style='color: #888;'>Собираем видео за последнюю неделю по 8 языкам...</p>";
+            try {
+                const response = await fetch(`/api/top-new-channels`);
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                
+                if (data.videos.length === 0) {
+                    topResultDiv.innerHTML = "<p style='color: #888;'>Видео не найдены. Попробуйте позже.</p>";
+                    return;
+                }
+
+                let html = `<div class="card"><ul class="top-list">`;
+                data.videos.forEach((v, index) => {
+                    html += `
+                        <li>
+                            <div class="top-info">
+                                <span class="top-rank">#${index + 1}</span>
+                                <div>
+                                    <a href="${v.url}" target="_blank" class="top-title">${v.title}</a>
+                                    <div class="top-meta">Канал: ${v.channelTitle} · Язык: ${v.lang}</div>
+                                </div>
+                            </div>
+                            <div class="top-stats">
+                                <div class="top-subs">${v.views.toLocaleString()} просмотров</div>
+                                <button class="btn-details" onclick="goToDetails('${v.channelId}')">Анализ канала</button>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += `</ul></div>`;
+                topResultDiv.innerHTML = html;
+
+            } catch (err) {
+                topResultDiv.innerHTML = `<p style="color:red;">Ошибка: ${err.message}</p>`;
+            } finally {
+                topBtn.disabled = false;
+                topBtn.textContent = "Показать Тренды";
+            }
         });
+
+        // Функция перехода к анализу по ID канала
+        window.goToDetails = function(channelId) {
+            const channelUrl = `https://youtube.com/channel/${channelId}`;
+            channelUrlInput.value = channelUrl;
+            switchTab('analyze');
+            analyzeChannel();
+        };
     </script>
 </body>
 </html>
